@@ -5,7 +5,8 @@
 
 const std::string	RESTART_GATEWAY		=	"restart gateway";
 const std::string	STOP_GATEWAY		=	"stop gateway";
-
+const int			SUCCESS_INDEX		=	0;
+const int			FAILURE_INDEX		=	-1;
 
 
 
