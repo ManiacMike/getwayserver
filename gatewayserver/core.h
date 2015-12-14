@@ -17,9 +17,8 @@ public:
 	void start();
 	void stop();
 	int createThread();
-	void* threadCallback();
-	std::vector<WorkThread*> m_vecWorkers;
 	int m_fdEpoll;
+	Dispatcher *pDispatcher;
 	AgentServer *m_pAgentServer;
 private:
 	

@@ -41,21 +41,22 @@ bool Core::start()
 		{
 			//TODO
 			//ConfigSvr::loadServiceOption(m_cfg);
+			
+			//start dispatcher
+			if(m_pDispatcher->start() == FAILURE_INDEX)
+			{
+				std::cout<<"Dispatcher Start Failed!!"<<std::endl;
+				break;
+
+			}
 
 			//start agentserver
-			m_pAgentServer->start();
-
-
-			//start threadpool
-			int iThreadCount = std::stoi(m_cfg[THREADPOOL_SIZE]);
-			for(int i = 0; i < iThreadCount; ++i)
+			if(m_pAgentServer->start() == FAILURE_INDEX)
 			{
-				WorkThread *worker = new WorkThread(this);
-				if(worker->open())
-				{
-					m_vecWorkers.push_back(worker);
-				}
-			}
+				std::cout<<"Agent Server Start Failed!!"<<std::endl;
+				break;
+			}	
+
 
 			bRet = true;
 		}

@@ -1,6 +1,17 @@
 #ifndef _AGENT_SERVER_H_
 #define _AGENT_SERVER_H_
 
+#include <map>
+
+class AgentData
+{
+public:
+	unsigned int uuid;
+	int sock;
+	char* buff;
+	int size;
+}
+
 class Agent
 {
 public:
@@ -8,8 +19,11 @@ public:
 	~Agent();
 
 	unsigned int uuid;
-}
+	int	sock;
 
+	char* buff;
+	int size;
+}
 
 
 
@@ -21,7 +35,11 @@ public:
 	~AgentServer();
 
 	bool start();
-	std::vector<Agent> agentList;
+	void stop();
+	void* threadCallback();
+	bool deserializeAgentData(Agent* pAgent, char* buff, int size);
+	std::map<std::string, Agent> m_AgentMap;
+	std::queue<AgentData*> m_AgentDataQueue;
 	int m_accepterTID;
 	int m_listenSock;
 
