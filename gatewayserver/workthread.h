@@ -6,7 +6,7 @@ class WorkThread
 public:
 	WorkThread();
 	~WorkThread();
-
+	start();
 	
 private:
 

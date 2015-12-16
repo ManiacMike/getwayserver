@@ -21,12 +21,17 @@ Dispatcher::start()
 
 bool Dispatcher::openServer()
 {
-	if(FAILURE_INDEX == createThread())
+	//start threadpool
+	int iThreadCount = 3;//std::stoi(m_cfg[THREADPOOL_SIZE]);
+	for(int i = 0; i < iThreadCount; ++i)
 	{
-		perror("Create thread failed");
-		exit(FAILURE_INDEX);
+		WorkThread *worker = new WorkThread(this);
+		if(worker->open())
+		{
+			m_vecWorkers.push_back(worker);
+		}
 	}
-	std::cout<<"Create Thread Success"<<std::endl;
+	
 }
 
 
@@ -50,16 +55,7 @@ int Dispatcher::createThread()
 
 void* Dispatcher::threadCallback()
 {
-	//start threadpool
-	int iThreadCount = 3;//std::stoi(m_cfg[THREADPOOL_SIZE]);
-	for(int i = 0; i < iThreadCount; ++i)
-	{
-		WorkThread *worker = new WorkThread(this);
-		if(worker->open())
-		{
-			m_vecWorkers.push_back(worker);
-		}
-	}
+	
 }
 
 
