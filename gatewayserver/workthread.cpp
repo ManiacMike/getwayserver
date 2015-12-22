@@ -75,12 +75,12 @@ void* WorkThread::threadCallback()
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE,NULL); // 设置其他线程可以cancel掉此线程
 	
 	
-	string sLogicPipeName = m_cfg[PIPE_NAMEPREFIX] + "0";
-	string sIMPipeName = m_cfg[PIPE_NAMEPREFIX] + "1";
-	string sOtherPipeName = m_cfg[PIPE_NAMEPREFIX] + "2";
-	m_LogicPipeReader.open(sLogicPipeName, m_cfg[PIPE_MODE]);
-	m_IMPipeReader.open(sIMPipeName, m_cfg[PIPE_MODE]);
-	m_OtherPipeReader.open(sOtherPipeName, m_cfg[PIPE_MODE]);
+	string sNormalPipeName = m_cfg[PIPE_NAMEPREFIX] + "0";
+	string sSequentialPipeName = m_cfg[PIPE_NAMEPREFIX] + "1";
+	string sBackupPipeName = m_cfg[PIPE_NAMEPREFIX] + "2";
+	m_NormalPipeReader.open(sNormalPipeName, m_cfg[PIPE_MODE]);
+	m_SequentialPipeReader.open(sSequentialPipeName, m_cfg[PIPE_MODE]);
+	m_BackupPipeReader.open(sBackupPipeName, m_cfg[PIPE_MODE]);
 
 	m_events = (epoll_event*)calloc(EPOLL_MAX_EVENTS, sizeof(m_events[0]));
 	while(1)
@@ -90,16 +90,14 @@ void* WorkThread::threadCallback()
 		MsgData msgData;
 		int iRet = -1;
 		int iWorkType = -1;
-		bool bLogicState = isLogicConnected();
-		if(false == bLogicState)
+		if(owner->preProcess())
 		{
-			reconnectLogic();
 			continue;
 		}
-		else if(true == bLogicState)
+		else
 		{
 			std::cout<<m_tid<<" epoll start wait..."<<std::endl;
-			int iEventCount = epoll_wait(owner->m_fdEpoll, m_events, EPOLL_MAX_EVENTS, std::stoi(m_cfg[THREADPOOL_TIMEOUT]));
+			int iEventCount = epoll_wait(owner->m_fdNotifyEpoll, m_events, EPOLL_MAX_EVENTS, std::stoi(m_cfg[THREADPOOL_TIMEOUT]));
 			
 
 			if(-1 == iEventCount)

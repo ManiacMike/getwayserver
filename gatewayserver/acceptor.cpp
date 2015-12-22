@@ -1,24 +1,17 @@
-#include <stdio.h>
+#include "Acceptor.h"
+
+Acceptor::Acceptor()
+{
+	
+}
 
 
-Dispatcher::Dispatcher()
+Acceptor::~Acceptor()
 {
 
 }
 
-Dispatcher::~Dispatcher()
-{
-
-}
-
-
-Dispatcher::start()
-{
-
-}
-
-
-void Dispatcher::epollAccept()
+void Acceptor::epollAccept()
 {
 	int connSock;
 	struct sockaddr_in clientaddr;
@@ -55,7 +48,7 @@ void Dispatcher::epollAccept()
 
 		Agent *pAgent = nullptr;
 		std::string sClientIP(cClinetIP);
-		std::cout<<"accept a inner client from IP "<<sClientIP<<", fd "<<connSock<<std::endl;
+		std::cout<<"accept a outter client from IP "<<sClientIP<<", fd "<<connSock<<std::endl;
 		std::map<int, Agent>::iterator iter = m_AgentMap.find(connSock);
 		if(iter == m_AgentMap.end())
 		{
@@ -84,7 +77,7 @@ void Dispatcher::epollAccept()
 	}
 }
 
-void Dispatcher::epollRead()
+void Acceptor::epollRead()
 {
 	//当前fd是client连接的socket，可以读(read from client)
 	connSock = events[i].data.fd;
@@ -108,8 +101,8 @@ void Dispatcher::epollRead()
 	//可以是将Agent序列化为AgentData后存储，但也可以直接存储Agent
 	AgentData *agentData = deserializeAgentData(*iter, buffer, recv_size);
 	//swapPointer();
-	acceptor.pushMessage();
-	acceptor.notify();
+	dispatcher.pushMessage();
+	dispatcher.notify();
 	/*
 	//立即将收到的内容写回去
 	if ( send(conn_sock, buffer, recv_size, 0) == -1 && (errno != EAGAIN) && (errno != EWOULDBLOCK) ) 
@@ -124,7 +117,7 @@ void Dispatcher::epollRead()
 }
 
 
-AgentData* Dispatcher::deserializeAgentData(Agent *pAgent, char* buff, int size)
+AgentData* Acceptor::deserializeAgentData(Agent *pAgent, char* buff, int size)
 {
 	pAgent->data = buff;
 	pAgent->size = size;
@@ -138,14 +131,14 @@ AgentData* Dispatcher::deserializeAgentData(Agent *pAgent, char* buff, int size)
 	return pAgentData;
 }
 
-void Dispatcher::swapPointer(Agent *pAgentOrig, Agent *pAgentNew)
+void Acceptor::swapPointer(Agent *pAgentOrig, Agent *pAgentNew)
 {
 	pAgentNew = pAgentOrig;
 	pAgentOrig = new Agent();
 }
 
 
-bool Dispatcher::pushMessage(AgentData *pAgentData)
+bool Acceptor::pushMessage(AgentData *pAgentData)
 {
 	bool bRet = false;
 
@@ -163,19 +156,3 @@ bool Dispatcher::pushMessage(AgentData *pAgentData)
 
 	
 }
-
-
-bool Dispatcher::preProcess()
-{
-	bool bLogicState = isLogicConnected();
-	if(false == bLogicState)
-	{
-		reconnectLogic();
-		return false;
-	}
-	else
-		return true;
-}
-
-
-

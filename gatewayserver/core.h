@@ -17,9 +17,9 @@ public:
 	void start();
 	void stop();
 	int createThread();
-	int m_fdEpoll;
-	Dispatcher *pDispatcher;
-	AgentServer *m_pAgentServer;
+	Acceptor *m_pAcceptor;
+	Dispatcher *m_pDispatcher;
+	
 private:
 	
 }

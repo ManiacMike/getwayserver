@@ -2,13 +2,8 @@
 
 Core::Core()
 {
-	m_pAgentServer = new AgentServer(this);
-	m_fdEpoll = epoll_create1(EPOLL_CLOEXEC);
-	if(-1 == m_fdEpoll)
-	{
-		perror("epoll_create1");
-		exit(1);
-	}
+	m_pAcceptor = new Acceptor();
+	m_pDispatcher = new Dispatcher();
 }
 
 Core::~Core()
@@ -23,9 +18,9 @@ Core::~Core()
 		print("Work Threads Deleted!!");
 	}
 
-	if(m_pAgents)
-		delete m_pAgents;
-	m_pAgents = nullptr;
+	if(m_pAcceptor)
+		delete m_pAcceptor;
+	m_pAcceptor = nullptr;
 	
 	if(m_pAgentServer)
 		delete m_pAgentServer;
@@ -42,6 +37,15 @@ bool Core::start()
 			//TODO
 			//ConfigSvr::loadServiceOption(m_cfg);
 			
+			//start acceptor
+			if(m_pAcceptor->start() == FAILURE_INDEX)
+			{
+				std::cout<<"Agent Server Start Failed!!"<<std::endl;
+				break;
+			}	
+			//start acceptor workers
+			m_pAcceptor->startThreadPool(1);
+			
 			//start dispatcher
 			if(m_pDispatcher->start() == FAILURE_INDEX)
 			{
@@ -49,15 +53,11 @@ bool Core::start()
 				break;
 
 			}
-
-			//start agentserver
-			if(m_pAgentServer->start() == FAILURE_INDEX)
-			{
-				std::cout<<"Agent Server Start Failed!!"<<std::endl;
-				break;
-			}	
+			//start dispatcher workers
+			m_pDispatcher->startThreadPool(1);
 
 
+			
 			bRet = true;
 		}
 		while(0)
